@@ -6,11 +6,10 @@
 import { auth } from "@/firebase";
 import router from "./router";
 
-auth.onAuthStateChanged((user) => {
-  if (user) {
-    // ログイン時に行いたい処理などをここに書く
-    console.log(user);
-    router.push("/workspaces");
-  }
-});
+import { useStore } from "vuex";
+import useOnAuthStateChanged from "./composables/useOnAuthStateChanged";
+
+const store = useStore();
+
+useOnAuthStateChanged(store, () => router.push("/workspaces"));
 </script>

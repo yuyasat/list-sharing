@@ -1,7 +1,13 @@
 <template>
-  <ItemList />
+  <WorkspaceList :firebaseUser="firebaseUser" />
 </template>
 
 <script lang="ts" setup>
-import ItemList from "@/components/ItemList.vue";
+import WorkspaceList from "@/components/WorkspaceList.vue";
+const { firebaseUser } = defineProps({
+  firebaseUser: {
+    type: Array,
+    required: true,
+  },
+});
 </script>
