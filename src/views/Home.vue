@@ -1,7 +1,7 @@
 <template>
-  <ItemList />
+  <Login />
 </template>
 
 <script lang="ts" setup>
-import ItemList from "@/components/ItemList.vue";
+import Login from "@/components/Login.vue";
 </script>
