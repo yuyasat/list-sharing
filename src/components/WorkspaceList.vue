@@ -20,7 +20,7 @@
                   <v-list-item
                     v-for="(list, index) in threeDotsMenuList"
                     :key="index"
-                    @click="removeItem(workspace)"
+                    @click="list.func(workspace)"
                   >
                     <v-list-item-title>{{ list.label }}</v-list-item-title>
                   </v-list-item>
@@ -49,6 +49,7 @@ import {
   Query,
   deleteDoc,
   doc,
+  updateDoc,
   where,
 } from "firebase/firestore";
 import { db } from "../firebase.js";
@@ -56,9 +57,9 @@ import Workspace from "@/types/Workspace";
 import { useStore } from "vuex";
 import { watchEffect } from "vue";
 import router from "@/router";
+import { remove } from "@vue/shared";
 
 const offset = true;
-const threeDotsMenuList = [{ label: "削除", action: "delete" }];
 
 const store = useStore();
 const firebaseUser = store.state.firebaseUser;
@@ -93,12 +94,35 @@ const clickItem = (workspace: Workspace) => {
   store.commit("setWorkspace", workspace);
   router.push(`/${workspace.id}/items`);
 };
+
+const updateItem = (workspace: Workspace) => {
+  if (!workspace.visible) return;
+
+  const workspaceName: string | null = prompt(
+    `workspace名を変更します。`,
+    workspace.title
+  );
+  if (workspaceName) {
+    const docRef = doc(db, "workspaces", String(workspace.id));
+    updateDoc(docRef, {
+      title: workspaceName,
+    });
+  }
+};
+
 const removeItem = async (workspace: Workspace) => {
   if (!workspace.visible) return;
+  const result = confirm("本当に削除しますか？");
+  if (!result) return;
 
   const docRef = doc(db, "workspaces", String(workspace.id));
   await deleteDoc(docRef);
 };
+
+const threeDotsMenuList = [
+  { label: "削除", action: "delete", func: removeItem },
+  { label: "編集", action: "update", func: updateItem },
+];
 </script>
 
 <style scoped></style>

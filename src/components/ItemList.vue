@@ -31,7 +31,7 @@
                   <v-list-item
                     v-for="(list, index) in threeDotsMenuList"
                     :key="index"
-                    @click="removeItem(item)"
+                    @click="list.func(item)"
                   >
                     <v-list-item-title>{{ list.label }}</v-list-item-title>
                   </v-list-item>
@@ -66,7 +66,6 @@ import { watchEffect, mergeProps } from "vue";
 const store = useStore();
 const workspace = store.state.workspace;
 const items = ref<Item[]>([]);
-const threeDotsMenuList = [{ label: "削除", action: "delete" }];
 const offset = true;
 
 watchEffect(() => {
@@ -102,12 +101,32 @@ const checkItem = (item: Item) => {
     checked: !item.checked,
   });
 };
+
+const updateItem = (item: Item) => {
+  if (!item.visible) return;
+
+  const itemName: string | null = prompt(`item名を変更します。`, item.title);
+  if (itemName) {
+    const docRef = doc(db, "items", String(item.id));
+    updateDoc(docRef, {
+      title: itemName,
+    });
+  }
+};
+
 const removeItem = async (item: Item) => {
   if (!item.visible) return;
+  const result = confirm("本当に削除しますか？");
+  if (!result) return;
 
   const docRef = doc(db, "items", String(item.id));
   await deleteDoc(docRef);
 };
+
+const threeDotsMenuList = [
+  { label: "削除", func: removeItem },
+  { label: "編集", func: updateItem },
+];
 </script>
 
 <style scoped>
