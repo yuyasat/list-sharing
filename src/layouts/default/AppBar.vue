@@ -19,7 +19,6 @@ import { auth, db } from "@/firebase";
 import { useStore } from "vuex";
 import { computed } from "vue";
 import route from "@/router";
-import { signOut } from "firebase/auth";
 
 const store = useStore();
 const firebaseUser = store.state.firebaseUser;
