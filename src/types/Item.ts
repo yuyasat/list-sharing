@@ -1,7 +1,8 @@
 type Item = {
   title: string
   checked: boolean
-  id: string
+  id?: string
+  visible: boolean
 }
 
 export default Item

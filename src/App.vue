@@ -11,5 +11,11 @@ import useOnAuthStateChanged from "./composables/useOnAuthStateChanged";
 
 const store = useStore();
 
-useOnAuthStateChanged(store, () => router.push("/workspaces"));
+useOnAuthStateChanged(store, () => {
+  if (store.state.workspace) {
+    // router.push(`/${store.state.workspace.id}/items`);
+  } else {
+    // router.push("/workspaces");
+  }
+});
 </script>

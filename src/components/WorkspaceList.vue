@@ -1,19 +1,37 @@
 <template>
   <div>
-    <v-container fluid>
+    <v-container fluid class="mb-n10">
       <v-row>
-        <v-row no-gutters>
+        <v-row>
           <template v-for="(workspace, index) in workspaces" :key="index">
-            <v-col cols="8" @click="clickItem(workspace)">{{
+            <v-col cols="10" class="mt-2 pl-5" @click="clickItem(workspace)">{{
               workspace.title
             }}</v-col>
-            <v-col
-              cols="4"
-              @click="clickItem(workspace)"
-              align="center"
-              class="mt-2"
-              >{{ firebaseUser?.uid }}</v-col
-            >
+            <v-col cols="2" align="center" class="mt-2">
+              <v-menu bottom :offset-y="offset">
+                <template v-slot:activator="{ props: menu }">
+                  <v-icon
+                    :color="`${workspace.visible ? '' : 'white'}`"
+                    icon="more_vert"
+                    v-bind="mergeProps(menu)"
+                  ></v-icon>
+                </template>
+                <v-list>
+                  <v-list-item
+                    v-for="(list, index) in threeDotsMenuList"
+                    :key="index"
+                    @click="removeItem(workspace)"
+                  >
+                    <v-list-item-title>{{ list.label }}</v-list-item-title>
+                  </v-list-item>
+                </v-list>
+              </v-menu>
+            </v-col>
+            <v-divider
+              v-if="
+                ![workspaces.length - 1, workspaces.length - 2].includes(index)
+              "
+            ></v-divider>
           </template>
         </v-row>
       </v-row>
@@ -22,20 +40,25 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from "vue";
+import { ref, mergeProps } from "vue";
 import {
   collection,
   onSnapshot,
   query,
   DocumentData,
   Query,
+  deleteDoc,
+  doc,
   where,
 } from "firebase/firestore";
 import { db } from "../firebase.js";
 import Workspace from "@/types/Workspace";
-import { storeKey, useStore } from "vuex";
+import { useStore } from "vuex";
 import { watchEffect } from "vue";
 import router from "@/router";
+
+const offset = true;
+const threeDotsMenuList = [{ label: "削除", action: "delete" }];
 
 const store = useStore();
 const firebaseUser = store.state.firebaseUser;
@@ -49,19 +72,32 @@ watchEffect(() => {
   onSnapshot(collectionRef, (querySnapshot) => {
     const _workspaces: Workspace[] = [];
     querySnapshot.forEach((doc) => {
-      console.log(doc);
       _workspaces.push({
         id: doc.id,
         title: doc.data().title,
+        visible: true,
       });
+    });
+    _workspaces.push({
+      id: undefined,
+      title: "",
+      visible: false,
     });
     workspaces.value = _workspaces;
   });
 });
 
 const clickItem = (workspace: Workspace) => {
+  if (!workspace.visible) return;
+
   store.commit("setWorkspace", workspace);
   router.push(`/${workspace.id}/items`);
+};
+const removeItem = async (workspace: Workspace) => {
+  if (!workspace.visible) return;
+
+  const docRef = doc(db, "workspaces", String(workspace.id));
+  await deleteDoc(docRef);
 };
 </script>
 

@@ -1,4 +1,5 @@
 import { auth } from "@/firebase";
+import router from "@/router";
 
 
 const useOnAuthStateChanged = (store: any, afterFunction: () => any) => {
@@ -8,6 +9,8 @@ const useOnAuthStateChanged = (store: any, afterFunction: () => any) => {
       store.commit("setFirebaseUser", user);
       afterFunction();
       return user
+    } else {
+      router.push("/login");
     }
   })
 }

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-container fluid>
+    <v-container fluid class="mb-n10">
       <v-row>
         <v-row no-gutters>
           <template v-for="(item, index) in items" :key="index">
@@ -9,20 +9,22 @@
                 hide-details
                 color="secondary"
                 :model-value="item.checked"
-                @click="clickHandler(item)"
+                @click="checkItem(item)"
                 density="compact"
+                v-show="item.visible"
               >
                 <template v-slot:label>
                   <span :class="{ done: item.checked }">{{ item.title }}</span>
                 </template></v-checkbox
               ></v-col
             >
-            <v-col cols="2" align="center" class="mt-2">
+            <v-col cols="2" align="center" class="mt-2 pl-2">
               <v-menu bottom :offset-y="offset">
                 <template v-slot:activator="{ props: menu }">
                   <v-icon
-                    icon="mdi-dots-vertical"
+                    icon="more_vert"
                     v-bind="mergeProps(menu)"
+                    :color="`${item.visible ? '' : 'white'}`"
                   ></v-icon>
                 </template>
                 <v-list>
@@ -80,21 +82,31 @@ watchEffect(() => {
         id: doc.id,
         title: doc.data().title,
         checked: doc.data().checked,
+        visible: true,
       });
+    });
+    _items.push({
+      id: undefined,
+      title: "",
+      checked: false,
+      visible: false,
     });
     items.value = _items;
   });
 });
-const clickHandler = (item: Item) => {
-  const docRef = doc(db, "items", item.id);
+const checkItem = (item: Item) => {
+  if (!item.visible) return;
+
+  const docRef = doc(db, "items", String(item.id));
   updateDoc(docRef, {
     checked: !item.checked,
   });
 };
 const removeItem = async (item: Item) => {
-  const docRef = doc(db, "items", item.id);
-  const res = await deleteDoc(docRef);
-  console.log(res);
+  if (!item.visible) return;
+
+  const docRef = doc(db, "items", String(item.id));
+  await deleteDoc(docRef);
 };
 </script>
 

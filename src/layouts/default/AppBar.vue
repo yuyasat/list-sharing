@@ -2,10 +2,11 @@
   <v-app-bar flat>
     <v-toolbar color="light-blue" dark>
       <v-toolbar-title>{{ appBarTitle }}</v-toolbar-title>
-      <v-spacer></v-spacer>
+
       <v-btn
+        v-if="icon"
         density="default"
-        icon="mdi-open-in-new"
+        :icon="String(icon)"
         @click="handleClick"
       ></v-btn>
     </v-toolbar>
@@ -29,6 +30,14 @@ const appBarTitle = computed(() => {
       return `${store.state.workspace.title} Items`;
     default:
       return "ListSharing";
+  }
+});
+const icon = computed(() => {
+  switch (route.currentRoute.value.name) {
+    case "Home":
+      return null;
+    default:
+      return "add";
   }
 });
 

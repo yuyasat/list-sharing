@@ -1,6 +1,7 @@
 type Workspace = {
+  id?: string
   title: string
-  id: string
+  visible: boolean
 }
 
 export default Workspace
