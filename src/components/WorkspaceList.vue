@@ -4,10 +4,16 @@
       <v-row>
         <v-row no-gutters>
           <template v-for="(workspace, index) in workspaces" :key="index">
-            <v-col cols="8">{{ workspace.title }}</v-col>
-            <v-col cols="4" align="center" class="mt-2">{{
-              firebaseUser?.uid
+            <v-col cols="8" @click="clickItem(workspace)">{{
+              workspace.title
             }}</v-col>
+            <v-col
+              cols="4"
+              @click="clickItem(workspace)"
+              align="center"
+              class="mt-2"
+              >{{ firebaseUser?.uid }}</v-col
+            >
           </template>
         </v-row>
       </v-row>
@@ -27,8 +33,9 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase.js";
 import Workspace from "@/types/Workspace";
-import { useStore } from "vuex";
+import { storeKey, useStore } from "vuex";
 import { watchEffect } from "vue";
+import router from "@/router";
 
 const store = useStore();
 const firebaseUser = store.state.firebaseUser;
@@ -51,6 +58,11 @@ watchEffect(() => {
     workspaces.value = _workspaces;
   });
 });
+
+const clickItem = (workspace: Workspace) => {
+  store.commit("setWorkspace", workspace);
+  router.push(`/${workspace.id}/items`);
+};
 </script>
 
 <style scoped></style>

@@ -4,11 +4,12 @@
       <v-row>
         <v-row no-gutters>
           <template v-for="(item, index) in items" :key="index">
-            <v-col cols="8" align="center">
+            <v-col cols="10" align="center">
               <v-checkbox
                 hide-details
                 color="secondary"
                 :model-value="item.checked"
+                @click="clickHandler(item)"
                 density="compact"
               >
                 <template v-slot:label>
@@ -16,7 +17,25 @@
                 </template></v-checkbox
               ></v-col
             >
-            <v-col cols="4" align="center" class="mt-2">セル2-3</v-col>
+            <v-col cols="2" align="center" class="mt-2">
+              <v-menu bottom :offset-y="offset">
+                <template v-slot:activator="{ props: menu }">
+                  <v-icon
+                    icon="mdi-dots-vertical"
+                    v-bind="mergeProps(menu)"
+                  ></v-icon>
+                </template>
+                <v-list>
+                  <v-list-item
+                    v-for="(list, index) in threeDotsMenuList"
+                    :key="index"
+                    @click="removeItem(item)"
+                  >
+                    <v-list-item-title>{{ list.label }}</v-list-item-title>
+                  </v-list-item>
+                </v-list>
+              </v-menu>
+            </v-col>
           </template>
         </v-row>
       </v-row>
@@ -26,12 +45,57 @@
 
 <script lang="ts" setup>
 import { ref } from "vue";
-const items = ref([
-  { title: "オリーブオイル", checked: true, lastUpdated: "2021/10/01" },
-  { title: "クレラップ", checked: false, lastUpdated: "2021/10/01" },
-  { title: "ハンドソープ", checked: false, lastUpdated: "2021/10/01" },
-  { title: "黒ニンニク", checked: true, lastUpdated: "2021/10/01" },
-]);
+import {
+  collection,
+  onSnapshot,
+  query,
+  DocumentData,
+  Query,
+  doc,
+  where,
+  deleteDoc,
+  updateDoc,
+} from "firebase/firestore";
+import { db } from "../firebase.js";
+import Item from "@/types/Item";
+import { useStore } from "vuex";
+import { watchEffect, mergeProps } from "vue";
+
+const store = useStore();
+const workspace = store.state.workspace;
+const items = ref<Item[]>([]);
+const threeDotsMenuList = [{ label: "削除", action: "delete" }];
+const offset = true;
+
+watchEffect(() => {
+  const collectionRef: Query<DocumentData> = query(
+    collection(db, "items"),
+    where("workspaceId", "==", workspace.id)
+  );
+  onSnapshot(collectionRef, (querySnapshot) => {
+    const _items: Item[] = [];
+    querySnapshot.forEach((doc) => {
+      console.log(doc);
+      _items.push({
+        id: doc.id,
+        title: doc.data().title,
+        checked: doc.data().checked,
+      });
+    });
+    items.value = _items;
+  });
+});
+const clickHandler = (item: Item) => {
+  const docRef = doc(db, "items", item.id);
+  updateDoc(docRef, {
+    checked: !item.checked,
+  });
+};
+const removeItem = async (item: Item) => {
+  const docRef = doc(db, "items", item.id);
+  const res = await deleteDoc(docRef);
+  console.log(res);
+};
 </script>
 
 <style scoped>

@@ -19,8 +19,19 @@ const routes = [
     children: [
       {
         path: '',
-        name: 'workspaces',
+        name: 'Workspaces',
         component: () => import('@/views/Workspace.vue'),
+      },
+    ],
+  },
+  {
+    path: '/:workspaceId/items',
+    component: () => import('@/layouts/default/Default.vue'),
+    children: [
+      {
+        path: '',
+        name: 'Items',
+        component: () => import('@/views/Item.vue'),
       },
     ],
   },
