@@ -57,7 +57,6 @@ import Workspace from "@/types/Workspace";
 import { useStore } from "vuex";
 import { watchEffect } from "vue";
 import router from "@/router";
-import { remove } from "@vue/shared";
 
 const offset = true;
 
