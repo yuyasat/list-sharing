@@ -15,10 +15,11 @@
 
 <script lang="ts" setup>
 import { collection, addDoc } from "firebase/firestore";
-import { db } from "@/firebase";
+import { auth, db } from "@/firebase";
 import { useStore } from "vuex";
 import { computed } from "vue";
 import route from "@/router";
+import { signOut } from "firebase/auth";
 
 const store = useStore();
 const firebaseUser = store.state.firebaseUser;
@@ -32,10 +33,12 @@ const appBarTitle = computed(() => {
       return "ListSharing";
   }
 });
+
+const isLoggedIn = computed(() => !!store.state.firebaseUser);
 const icon = computed(() => {
   switch (route.currentRoute.value.name) {
     case "Home":
-      return null;
+      return isLoggedIn.value ? "logout" : null;
     default:
       return "add";
   }
@@ -43,6 +46,9 @@ const icon = computed(() => {
 
 const handleClick = () => {
   switch (route.currentRoute.value.name) {
+    case "Home":
+      logout();
+      break;
     case "Workspaces":
       addWorkspace();
       break;
@@ -79,5 +85,14 @@ const addItem = async () => {
   } else {
     alert("itemの作成に失敗しました。");
   }
+};
+
+const logout = () => {
+  store.commit("setFirebaseUser", null);
+  route.push("/");
+
+  auth.signOut().then(() => {
+    console.log("logout");
+  });
 };
 </script>

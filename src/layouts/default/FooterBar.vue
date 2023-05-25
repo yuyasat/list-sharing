@@ -1,6 +1,7 @@
 <template>
   <v-footer app class="mb-2">
     <v-btn
+      v-if="showBackIcon()"
       color="light-blue"
       density="default"
       icon="chevron_left"
@@ -23,6 +24,9 @@ const handleClick = () => {
       break;
     default:
   }
+};
+const showBackIcon = () => {
+  return !["Home", "undefined"].includes(String(route.currentRoute.value.name));
 };
 </script>
 
