@@ -6,7 +6,7 @@
           <template v-for="(member, index) in members" :key="index">
             <v-col cols="10" class="mt-2 pl-5">{{ member.email }}</v-col>
             <v-col cols="2" align="center" class="mt-2">
-              <v-menu bottom :offset-y="offset">
+              <v-menu bottom offset-y="true">
                 <template v-slot:activator="{ props: menu }">
                   <v-icon
                     v-if="loginUser.uid !== member.uid"
@@ -53,15 +53,22 @@ import { db } from "../firebase.js";
 import { useStore } from "vuex";
 import { watchEffect } from "vue";
 import User from "@/types/User";
-
-const offset = true;
+import router from "@/router";
+import { computed } from "vue";
+import checkValidWorkspace from "@/modules/checkValidWorkspace";
 
 const store = useStore();
-const loginUser = store.state.firebaseUser;
+const loginUser: User = store.state.firebaseUser;
 const members = ref<User[]>([]);
-const workspaceId = store.state.workspace.id;
+const workspaceId = computed(() =>
+  String(
+    store.state.workspace.id || router.currentRoute.value.params.workspaceId
+  )
+);
 
-const getUsers = async (_userUids: string[]) => {
+checkValidWorkspace(loginUser.uid, workspaceId.value);
+
+const getUsers = async (_userUids: string[]): Promise<User[]> => {
   const q = query(
     collection(db, "users"),
     where(documentId(), "in", _userUids)
@@ -80,7 +87,7 @@ const getUsers = async (_userUids: string[]) => {
 };
 
 watchEffect(() => {
-  const docRef = doc(db, "workspaces", String(workspaceId));
+  const docRef = doc(db, "workspaces", workspaceId.value);
   onSnapshot(docRef, (querySnapshot) => {
     const uids = querySnapshot.data()?.members;
     getUsers(uids).then((users) => {
@@ -95,7 +102,7 @@ const removeItem = async (user: User) => {
   if (!result) return;
   console.log(workspaceId, user.uid);
 
-  const docRef = doc(db, "workspaces", String(workspaceId));
+  const docRef = doc(db, "workspaces", workspaceId.value);
   await updateDoc(docRef, {
     members: arrayRemove(user.uid),
   });

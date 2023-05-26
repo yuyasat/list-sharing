@@ -15,35 +15,24 @@
 import { signInWithPopup } from "firebase/auth";
 import { auth, db, provider } from "@/firebase";
 import router from "@/router";
-import {
-  arrayUnion,
-  doc,
-  getDoc,
-  setDoc,
-  updateDoc,
-} from "@firebase/firestore";
+import { arrayUnion, doc, getDoc, updateDoc } from "@firebase/firestore";
 import { ref } from "vue";
+import setUser from "@/modules/setUser";
 
-const workspaceId = router.currentRoute.value.params.workspaceId;
+const workspaceId = String(router.currentRoute.value.params.workspaceId);
 const workspaceTitle = ref<string | undefined>("");
 
 const setWorkspaceTitle = async () => {
-  const docRef = doc(db, "workspaces", String(workspaceId));
+  const docRef = doc(db, "workspaces", workspaceId);
   const data = await getDoc(docRef);
   workspaceTitle.value = data.data()?.title;
 };
 setWorkspaceTitle();
 
 const addUserToWorkspace = async (uid: string) => {
-  const docRef = doc(db, "workspaces", String(workspaceId));
+  const docRef = doc(db, "workspaces", workspaceId);
   await updateDoc(docRef, {
     members: arrayUnion(...[uid]),
-  });
-};
-const setUser = async (user: any) => {
-  await setDoc(doc(db, "users", user.uid), {
-    email: user.email,
-    displayName: user.displayName,
   });
 };
 

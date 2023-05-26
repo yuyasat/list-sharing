@@ -4,11 +4,14 @@
       <v-row>
         <v-row>
           <template v-for="(workspace, index) in workspaces" :key="index">
-            <v-col cols="10" class="mt-2 pl-5" @click="clickItem(workspace)">{{
-              workspace.title
-            }}</v-col>
+            <v-col
+              cols="10"
+              class="mt-2 pl-5"
+              @click="clickWorkspace(workspace)"
+              >{{ workspace.title }}</v-col
+            >
             <v-col cols="2" align="center" class="mt-2">
-              <v-menu bottom :offset-y="offset">
+              <v-menu bottom offset-y="true">
                 <template v-slot:activator="{ props: menu }">
                   <v-icon
                     :color="`${workspace.visible ? '' : 'white'}`"
@@ -51,25 +54,25 @@ import {
   doc,
   updateDoc,
   where,
+  QuerySnapshot,
 } from "firebase/firestore";
 import { db } from "../firebase.js";
 import Workspace from "@/types/Workspace";
 import { useStore } from "vuex";
 import { watchEffect } from "vue";
 import router from "@/router";
-
-const offset = true;
+import User from "@/types/User";
 
 const store = useStore();
-const firebaseUser = store.state.firebaseUser;
+const loginUser: User = store.state.firebaseUser;
 const workspaces = ref<Workspace[]>([]);
 
 watchEffect(() => {
   const collectionRef: Query<DocumentData> = query(
     collection(db, "workspaces"),
-    where("members", "array-contains", firebaseUser.uid)
+    where("members", "array-contains", loginUser.uid)
   );
-  onSnapshot(collectionRef, (querySnapshot) => {
+  onSnapshot(collectionRef, (querySnapshot: QuerySnapshot<DocumentData>) => {
     const _workspaces: Workspace[] = [];
     querySnapshot.forEach((doc) => {
       _workspaces.push({
@@ -87,14 +90,14 @@ watchEffect(() => {
   });
 });
 
-const clickItem = (workspace: Workspace) => {
+const clickWorkspace = (workspace: Workspace) => {
   if (!workspace.visible) return;
 
   store.commit("setWorkspace", workspace);
   router.push(`/${workspace.id}/items`);
 };
 
-const updateItem = (workspace: Workspace) => {
+const updateWorkspace = (workspace: Workspace) => {
   if (!workspace.visible) return;
 
   const workspaceName: string | null = prompt(
@@ -109,7 +112,7 @@ const updateItem = (workspace: Workspace) => {
   }
 };
 
-const removeItem = async (workspace: Workspace) => {
+const removeWorkspace = async (workspace: Workspace) => {
   if (!workspace.visible) return;
   const result = confirm("本当に削除しますか？");
   if (!result) return;
@@ -119,11 +122,10 @@ const removeItem = async (workspace: Workspace) => {
 };
 
 const threeDotsMenuList = [
-  { label: "編集", action: "update", func: updateItem },
-  { label: "削除", action: "delete", func: removeItem },
+  { label: "編集", func: updateWorkspace },
+  { label: "削除", func: removeWorkspace },
   {
     label: "共有者管理",
-    action: "update",
     func: (workspace: Workspace) => {
       router.push(`/${workspace.id}/members`);
     },

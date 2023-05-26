@@ -1,5 +1,9 @@
 // Composables
 import { createRouter, createWebHistory } from 'vue-router'
+import store from '@/store/index';
+import User from '@/types/User';
+import checkValidWorkspace from '@/modules/checkValidWorkspace';
+import { log } from 'console';
 
 const routes = [
   {

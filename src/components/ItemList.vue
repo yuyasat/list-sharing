@@ -19,7 +19,7 @@
               ></v-col
             >
             <v-col cols="2" align="center" class="mt-2 pl-2">
-              <v-menu bottom :offset-y="offset">
+              <v-menu bottom offset-y="true">
                 <template v-slot:activator="{ props: menu }">
                   <v-icon
                     icon="more_vert"
@@ -46,7 +46,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import {
   collection,
   onSnapshot,
@@ -62,16 +62,25 @@ import { db } from "../firebase.js";
 import Item from "@/types/Item";
 import { useStore } from "vuex";
 import { watchEffect, mergeProps } from "vue";
+import router from "@/router";
+import User from "@/types/User";
+import checkValidWorkspace from "@/modules/checkValidWorkspace";
 
 const store = useStore();
-const workspace = store.state.workspace;
+const loginUser = computed<User>(() => store.state.firebaseUser);
+const workspaceId = computed<string>(() =>
+  String(
+    store.state.workspace.id || router.currentRoute.value.params.workspaceId
+  )
+);
 const items = ref<Item[]>([]);
-const offset = true;
+
+checkValidWorkspace(loginUser.value.uid, workspaceId.value);
 
 watchEffect(() => {
   const collectionRef: Query<DocumentData> = query(
     collection(db, "items"),
-    where("workspaceId", "==", workspace.id)
+    where("workspaceId", "==", workspaceId.value)
   );
   onSnapshot(collectionRef, (querySnapshot) => {
     const _items: Item[] = [];

@@ -5,7 +5,7 @@
       <v-btn
         v-if="icon"
         density="default"
-        :icon="String(icon)"
+        :icon="icon"
         @click="handleClick"
       ></v-btn>
     </v-toolbar>
@@ -21,7 +21,7 @@ import route from "@/router";
 import Workspace from "@/types/Workspace";
 
 const store = useStore();
-const firebaseUser = store.state.firebaseUser;
+const loginUser = store.state.firebaseUser;
 const appBarTitle = computed(() => {
   switch (route.currentRoute.value.name) {
     case "Workspaces":
@@ -66,29 +66,25 @@ const handleClick = () => {
 };
 
 const addWorkspace = async () => {
-  let workspaceName: string | null = prompt(`新しいworkspaceを作成します。`);
-  if (workspaceName && firebaseUser) {
-    await addDoc(collection(db, "workspaces"), {
-      title: workspaceName,
-      members: [...[firebaseUser?.uid]],
-      visible: true,
-    });
-  } else {
-    alert("workspaceの作成に失敗しました。");
-  }
+  let workspaceName: string | null = prompt(`新しいWorkspaceを作成します。`);
+  if (!workspaceName || !loginUser) return;
+
+  await addDoc(collection(db, "workspaces"), {
+    title: workspaceName,
+    members: [...[loginUser?.uid]],
+    visible: true,
+  });
 };
 
 const addItem = async () => {
-  let itemName: string | null = prompt(`新しいitemを作成します。`);
-  if (itemName && firebaseUser) {
-    await addDoc(collection(db, "items"), {
-      title: itemName,
-      workspaceId: store.state.workspace.id,
-      checked: false,
-    });
-  } else {
-    alert("itemの作成に失敗しました。");
-  }
+  let itemName: string | null = prompt(`新しいItemを作成します。`);
+  if (!itemName || !loginUser) return;
+
+  await addDoc(collection(db, "items"), {
+    title: itemName,
+    workspaceId: store.state.workspace.id,
+    checked: false,
+  });
 };
 
 const displayAndCopyInvitationUrl = () => {
