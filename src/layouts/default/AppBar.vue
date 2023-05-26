@@ -16,8 +16,9 @@
 import { collection, addDoc } from "firebase/firestore";
 import { auth, db } from "@/firebase";
 import { useStore } from "vuex";
-import { computed, mergeProps } from "vue";
+import { computed } from "vue";
 import route from "@/router";
+import Workspace from "@/types/Workspace";
 
 const store = useStore();
 const firebaseUser = store.state.firebaseUser;
@@ -26,7 +27,9 @@ const appBarTitle = computed(() => {
     case "Workspaces":
       return "Workspaces";
     case "Items":
-      return `${store.state.workspace.title} Items`;
+      return `Items / ${store.state.workspace.title}`;
+    case "Members":
+      return `Members / ${store.state.workspace.title}`;
     default:
       return "ListSharing";
   }
@@ -53,6 +56,9 @@ const handleClick = () => {
       break;
     case "Items":
       addItem();
+      break;
+    case "Members":
+      displayAndCopyInvitationUrl();
       break;
     default:
       return "ListSharing";
@@ -83,6 +89,16 @@ const addItem = async () => {
   } else {
     alert("itemの作成に失敗しました。");
   }
+};
+
+const displayAndCopyInvitationUrl = () => {
+  const workspace: Workspace = store.state.workspace;
+  const url = `${location.origin}/${workspace.id}/invitation`;
+  if (!navigator.clipboard) return;
+
+  navigator.clipboard.writeText(url).then(() => {
+    alert(`以下の招待URLをコピーしました。共有してください。\n${url}`);
+  });
 };
 
 const logout = () => {

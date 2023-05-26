@@ -22,6 +22,9 @@ const handleClick = () => {
     case "Items":
       router.push("/workspaces");
       break;
+    case "Members":
+      router.push("/workspaces");
+      break;
     default:
   }
 };

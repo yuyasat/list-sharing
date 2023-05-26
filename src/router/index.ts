@@ -46,6 +46,17 @@ const routes = [
       },
     ],
   },
+  {
+    path: '/:workspaceId/members',
+    component: () => import('@/layouts/default/Default.vue'),
+    children: [
+      {
+        path: '',
+        name: 'Members',
+        component: () => import('@/views/Member.vue'),
+      },
+    ],
+  },
 ]
 
 const router = createRouter({
