@@ -67,7 +67,7 @@ const workspaces = ref<Workspace[]>([]);
 watchEffect(() => {
   const collectionRef: Query<DocumentData> = query(
     collection(db, "workspaces"),
-    where(`members.${firebaseUser.uid}`, "==", true)
+    where("members", "array-contains", firebaseUser.uid)
   );
   onSnapshot(collectionRef, (querySnapshot) => {
     const _workspaces: Workspace[] = [];
@@ -118,9 +118,20 @@ const removeItem = async (workspace: Workspace) => {
   await deleteDoc(docRef);
 };
 
+const displayAndCopyInvitationUrl = (workspace: Workspace) => {
+  const url = `${location.origin}/${workspace.id}/invitation`;
+  if (!navigator.clipboard) return;
+
+  navigator.clipboard.writeText(url).then(() => {
+    alert(`以下の招待URLをコピーしました。共有してください。\n${url}`);
+  });
+};
+
 const threeDotsMenuList = [
-  { label: "削除", action: "delete", func: removeItem },
   { label: "編集", action: "update", func: updateItem },
+  { label: "削除", action: "delete", func: removeItem },
+  { label: "共有者追加", action: "update", func: displayAndCopyInvitationUrl },
+  { label: "共有者管理", action: "update", func: () => {} },
 ];
 </script>
 

@@ -76,7 +76,6 @@ watchEffect(() => {
   onSnapshot(collectionRef, (querySnapshot) => {
     const _items: Item[] = [];
     querySnapshot.forEach((doc) => {
-      console.log(doc);
       _items.push({
         id: doc.id,
         title: doc.data().title,
@@ -106,12 +105,12 @@ const updateItem = (item: Item) => {
   if (!item.visible) return;
 
   const itemName: string | null = prompt(`item名を変更します。`, item.title);
-  if (itemName) {
-    const docRef = doc(db, "items", String(item.id));
-    updateDoc(docRef, {
-      title: itemName,
-    });
-  }
+  if (!itemName) return;
+
+  const docRef = doc(db, "items", String(item.id));
+  updateDoc(docRef, {
+    title: itemName,
+  });
 };
 
 const removeItem = async (item: Item) => {
@@ -124,8 +123,8 @@ const removeItem = async (item: Item) => {
 };
 
 const threeDotsMenuList = [
-  { label: "削除", func: removeItem },
   { label: "編集", func: updateItem },
+  { label: "削除", func: removeItem },
 ];
 </script>
 

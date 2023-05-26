@@ -35,6 +35,17 @@ const routes = [
       },
     ],
   },
+  {
+    path: '/:workspaceId/invitation',
+    component: () => import('@/layouts/default/Default.vue'),
+    children: [
+      {
+        path: '',
+        name: 'Invitation',
+        component: () => import('@/views/Invitation.vue'),
+      },
+    ],
+  },
 ]
 
 const router = createRouter({

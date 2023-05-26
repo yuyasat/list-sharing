@@ -2,7 +2,6 @@
   <v-app-bar flat>
     <v-toolbar color="light-blue" dark>
       <v-toolbar-title>{{ appBarTitle }}</v-toolbar-title>
-
       <v-btn
         v-if="icon"
         density="default"
@@ -17,7 +16,7 @@
 import { collection, addDoc } from "firebase/firestore";
 import { auth, db } from "@/firebase";
 import { useStore } from "vuex";
-import { computed } from "vue";
+import { computed, mergeProps } from "vue";
 import route from "@/router";
 
 const store = useStore();
@@ -34,6 +33,7 @@ const appBarTitle = computed(() => {
 });
 
 const isLoggedIn = computed(() => !!store.state.firebaseUser);
+
 const icon = computed(() => {
   switch (route.currentRoute.value.name) {
     case "Home":
@@ -64,9 +64,8 @@ const addWorkspace = async () => {
   if (workspaceName && firebaseUser) {
     await addDoc(collection(db, "workspaces"), {
       title: workspaceName,
-      members: {
-        [firebaseUser?.uid]: true,
-      },
+      members: [...[firebaseUser?.uid]],
+      visible: true,
     });
   } else {
     alert("workspaceの作成に失敗しました。");
