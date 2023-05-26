@@ -15,7 +15,13 @@
 import { signInWithPopup } from "firebase/auth";
 import { auth, db, provider } from "@/firebase";
 import router from "@/router";
-import { arrayUnion, doc, getDoc, updateDoc } from "@firebase/firestore";
+import {
+  arrayUnion,
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+} from "@firebase/firestore";
 import { ref } from "vue";
 
 const workspaceId = router.currentRoute.value.params.workspaceId;
@@ -34,10 +40,17 @@ const addUserToWorkspace = async (uid: string) => {
     members: arrayUnion(...[uid]),
   });
 };
+const setUser = async (user: any) => {
+  await setDoc(doc(db, "users", user.uid), {
+    email: user.email,
+    displayName: user.displayName,
+  });
+};
 
 const signIn = () => {
   signInWithPopup(auth, provider)
     .then((result) => {
+      setUser(result.user);
       addUserToWorkspace(result.user.uid);
       router.push("/workspaces");
     })

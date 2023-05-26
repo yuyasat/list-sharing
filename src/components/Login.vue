@@ -15,16 +15,25 @@
 
 <script lang="ts" setup>
 import { signInWithPopup } from "firebase/auth";
-import { auth, provider } from "@/firebase";
+import { auth, db, provider } from "@/firebase";
 import router from "@/router";
 import { useStore } from "vuex";
 import { computed } from "vue";
+import { doc, setDoc } from "@firebase/firestore";
 
 const store = useStore();
 const isLoggedIn = computed(() => !!store.state.firebaseUser);
 
+const setUser = async (user: any) => {
+  await setDoc(doc(db, "users", user.uid), {
+    email: user.email,
+    displayName: user.displayName,
+  });
+};
+
 const signIn = () => {
-  signInWithPopup(auth, provider).then((_result) => {
+  signInWithPopup(auth, provider).then((result) => {
+    setUser(result.user);
     router.push("/workspaces");
   });
 };

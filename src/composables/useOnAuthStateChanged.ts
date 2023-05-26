@@ -6,6 +6,7 @@ const useOnAuthStateChanged = (store: any, afterFunction: () => any) => {
     if (user) {
       const _user = { displayName: user.displayName, uid: user.uid, email: user.email, }
       store.commit("setFirebaseUser", _user);
+      
       afterFunction();
       return user
     } else {
