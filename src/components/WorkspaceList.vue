@@ -43,7 +43,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, mergeProps } from "vue";
+import { ref, mergeProps, computed } from "vue";
 import {
   collection,
   onSnapshot,
@@ -64,13 +64,13 @@ import router from "@/router";
 import User from "@/types/User";
 
 const store = useStore();
-const loginUser: User = store.state.firebaseUser;
+const loginUser = computed<User>(() => store.state.firebaseUser);
 const workspaces = ref<Workspace[]>([]);
 
 watchEffect(() => {
   const collectionRef: Query<DocumentData> = query(
     collection(db, "workspaces"),
-    where("members", "array-contains", loginUser.uid)
+    where("members", "array-contains", loginUser.value.uid)
   );
   onSnapshot(collectionRef, (querySnapshot: QuerySnapshot<DocumentData>) => {
     const _workspaces: Workspace[] = [];

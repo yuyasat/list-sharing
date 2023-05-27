@@ -19,9 +19,10 @@ import { useStore } from "vuex";
 import { computed } from "vue";
 import route from "@/router";
 import Workspace from "@/types/Workspace";
+import User from "@/types/User";
 
 const store = useStore();
-const loginUser = store.state.firebaseUser;
+const loginUser = computed<User>(() => store.state.firebaseUser);
 const appBarTitle = computed(() => {
   switch (route.currentRoute.value.name) {
     case "Workspaces":
@@ -67,23 +68,25 @@ const handleClick = () => {
 
 const addWorkspace = async () => {
   let workspaceName: string | null = prompt(`新しいWorkspaceを作成します。`);
-  if (!workspaceName || !loginUser) return;
+  if (!workspaceName || !loginUser.value) return;
 
   await addDoc(collection(db, "workspaces"), {
     title: workspaceName,
-    members: [...[loginUser?.uid]],
+    members: [...[loginUser.value.uid]],
     visible: true,
+    createdAt: new Date(),
   });
 };
 
 const addItem = async () => {
   let itemName: string | null = prompt(`新しいItemを作成します。`);
-  if (!itemName || !loginUser) return;
+  if (!itemName || !loginUser.value) return;
 
   await addDoc(collection(db, "items"), {
     title: itemName,
     workspaceId: store.state.workspace.id,
     checked: false,
+    createdAt: new Date(),
   });
 };
 

@@ -26,7 +26,7 @@ const isLoggedIn = computed(() => !!store.state.firebaseUser);
 
 const signIn = () => {
   signInWithPopup(auth, provider).then((result) => {
-    setUser(result.user);
+    setUser(store, result.user);
     router.push("/workspaces");
   });
 };

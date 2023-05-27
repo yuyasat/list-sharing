@@ -58,7 +58,7 @@ import { computed } from "vue";
 import checkValidWorkspace from "@/modules/checkValidWorkspace";
 
 const store = useStore();
-const loginUser: User = store.state.firebaseUser;
+const loginUser = computed<User>(() => store.state.firebaseUser);
 const members = ref<User[]>([]);
 const workspaceId = computed(() =>
   String(
@@ -66,7 +66,7 @@ const workspaceId = computed(() =>
   )
 );
 
-checkValidWorkspace(loginUser.uid, workspaceId.value);
+checkValidWorkspace(loginUser.value.uid, workspaceId.value);
 
 const getUsers = async (_userUids: string[]): Promise<User[]> => {
   const q = query(

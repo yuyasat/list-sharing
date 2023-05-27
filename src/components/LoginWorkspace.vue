@@ -18,7 +18,9 @@ import router from "@/router";
 import { arrayUnion, doc, getDoc, updateDoc } from "@firebase/firestore";
 import { ref } from "vue";
 import setUser from "@/modules/setUser";
+import { useStore } from "vuex";
 
+const store = useStore();
 const workspaceId = String(router.currentRoute.value.params.workspaceId);
 const workspaceTitle = ref<string | undefined>("");
 
@@ -39,7 +41,7 @@ const addUserToWorkspace = async (uid: string) => {
 const signIn = () => {
   signInWithPopup(auth, provider)
     .then((result) => {
-      setUser(result.user);
+      setUser(store, result.user);
       addUserToWorkspace(result.user.uid);
       router.push("/workspaces");
     })

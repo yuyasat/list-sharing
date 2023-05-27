@@ -17,8 +17,6 @@ auth.onAuthStateChanged(async (user) => {
       email: user.email,
     };
     store.commit("setFirebaseUser", _user);
-
-    return user;
   } else {
     router.push("/");
   }
