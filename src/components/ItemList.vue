@@ -1,46 +1,56 @@
 <template>
   <div>
     <v-container fluid class="mb-n10">
-      <v-row>
-        <v-row no-gutters>
-          <template v-for="(item, index) in items" :key="index">
-            <v-col cols="10" align="center">
+      <draggable
+        v-model="items"
+        item-key="id"
+        tag="div"
+        class="v-row"
+        @end="onEnd"
+        :disabled="!isDraggable"
+        animation="200"
+      >
+        <template #item="{ element, index }">
+          <v-row class="row__item my-0 list">
+            <v-col cols="10" align="center" class="py-0">
               <v-checkbox
                 hide-details
                 color="secondary"
-                :model-value="item.checked"
-                @click="checkItem(item)"
+                :model-value="element.checked"
+                @click="checkItem(element)"
                 density="compact"
-                v-show="item.visible"
+                v-show="element.visible"
               >
                 <template v-slot:label>
-                  <span :class="{ done: item.checked }">{{ item.title }}</span>
-                </template></v-checkbox
-              ></v-col
-            >
-            <v-col cols="2" align="center" class="mt-2 pl-2">
+                  <span :class="{ done: element.checked }">{{
+                    element.title
+                  }}</span>
+                </template>
+              </v-checkbox>
+            </v-col>
+            <v-col cols="2" align="center" class="mt-n">
               <v-menu bottom offset-y="true">
                 <template v-slot:activator="{ props: menu }">
                   <v-icon
                     icon="more_vert"
                     v-bind="mergeProps(menu)"
-                    :color="`${item.visible ? '' : 'white'}`"
+                    :color="`${element.visible ? '' : 'white'}`"
                   ></v-icon>
                 </template>
                 <v-list>
                   <v-list-item
                     v-for="(list, index) in threeDotsMenuList"
                     :key="index"
-                    @click="list.func(item)"
+                    @click="list.func(element)"
                   >
                     <v-list-item-title>{{ list.label }}</v-list-item-title>
                   </v-list-item>
                 </v-list>
               </v-menu>
             </v-col>
-          </template>
-        </v-row>
-      </v-row>
+          </v-row>
+        </template>
+      </draggable>
     </v-container>
   </div>
 </template>
@@ -57,6 +67,7 @@ import {
   where,
   deleteDoc,
   updateDoc,
+  orderBy,
 } from "firebase/firestore";
 import { db } from "../firebase.js";
 import Item from "@/types/Item";
@@ -65,9 +76,11 @@ import { watchEffect, mergeProps } from "vue";
 import router from "@/router";
 import User from "@/types/User";
 import checkValidWorkspace from "@/modules/checkValidWorkspace";
+import draggable from "vuedraggable";
 
 const store = useStore();
 const loginUser = computed<User>(() => store.state.firebaseUser);
+const isDraggable = ref<boolean>(false);
 const workspaceId = computed<string>(() =>
   String(
     store.state.workspace.id || router.currentRoute.value.params.workspaceId
@@ -80,7 +93,8 @@ checkValidWorkspace(loginUser.value.uid, workspaceId.value);
 watchEffect(() => {
   const collectionRef: Query<DocumentData> = query(
     collection(db, "items"),
-    where("workspaceId", "==", workspaceId.value)
+    where("workspaceId", "==", workspaceId.value),
+    orderBy("order", "desc")
   );
   onSnapshot(collectionRef, (querySnapshot) => {
     const _items: Item[] = [];
@@ -92,15 +106,20 @@ watchEffect(() => {
         visible: true,
       });
     });
-    _items.push({
-      id: undefined,
-      title: "",
-      checked: false,
-      visible: false,
-    });
     items.value = _items;
+    store.commit("setItemCount", _items.length);
   });
 });
+
+const onEnd = () => {
+  items.value.forEach(async (item, index) => {
+    const docRef = doc(db, "items", String(item.id));
+    await updateDoc(docRef, {
+      order: items.value.length - index,
+    });
+  });
+};
+
 const checkItem = (item: Item) => {
   if (!item.visible) return;
 
@@ -134,12 +153,19 @@ const removeItem = async (item: Item) => {
 const threeDotsMenuList = [
   { label: "編集", func: updateItem },
   { label: "削除", func: removeItem },
+  {
+    label: `${isDraggable.value ? "並び替え終了" : "並び替え"}`,
+    func: () => (isDraggable.value = !isDraggable.value),
+  },
 ];
 </script>
 
 <style scoped>
 .done {
   text-decoration: line-through;
+}
+.row__item {
+  width: 100vh;
 }
 .list:last-child::after {
   content: "";

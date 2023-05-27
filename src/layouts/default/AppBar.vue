@@ -24,6 +24,7 @@ import User from "@/types/User";
 const store = useStore();
 const loginUser = computed<User>(() => store.state.firebaseUser);
 const workspaceCount = computed<number>(() => store.state.workspaceCount);
+const itemCount = computed<number>(() => store.state.itemCount);
 const appBarTitle = computed(() => {
   switch (route.currentRoute.value.name) {
     case "Workspaces":
@@ -88,6 +89,7 @@ const addItem = async () => {
     title: itemName,
     workspaceId: store.state.workspace.id,
     checked: false,
+    order: itemCount.value,
     createdAt: new Date(),
   });
 };

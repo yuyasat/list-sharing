@@ -11,7 +11,7 @@
         animation="200"
       >
         <template #item="{ element, index }">
-          <v-row style="width: 100vh">
+          <v-row class="row__workspace">
             <v-col
               cols="10"
               class="mt-2 pl-5"
@@ -80,7 +80,7 @@ watchEffect(() => {
   const collectionRef: Query<DocumentData> = query(
     collection(db, "workspaces"),
     where("members", "array-contains", loginUser.value.uid),
-    orderBy("order", "asc")
+    orderBy("order", "desc")
   );
   onSnapshot(collectionRef, (querySnapshot: QuerySnapshot<DocumentData>) => {
     const _workspaces: Workspace[] = [];
@@ -97,11 +97,11 @@ watchEffect(() => {
   });
 });
 
-const onEnd = (e: any) => {
+const onEnd = () => {
   workspaces.value.forEach(async (workspace, index) => {
     const docRef = doc(db, "workspaces", String(workspace.id));
     await updateDoc(docRef, {
-      order: index,
+      order: workspaces.value.length - index,
     });
   });
 };
@@ -148,14 +148,15 @@ const threeDotsMenuList = computed(() => [
   },
   {
     label: `${isDraggable.value ? "並び替え終了" : "並び替え"}`,
-    func: () => {
-      isDraggable.value = !isDraggable.value;
-    },
+    func: () => (isDraggable.value = !isDraggable.value),
   },
 ]);
 </script>
 
 <style scoped>
+.row__workspace {
+  width: 100vh;
+}
 .list:last-child::after {
   content: "";
   display: block;
