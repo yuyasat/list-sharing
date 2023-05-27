@@ -100,7 +100,6 @@ const removeItem = async (user: User) => {
   if (!user.visible) return;
   const result = confirm("本当に削除しますか？");
   if (!result) return;
-  console.log(workspaceId, user.uid);
 
   const docRef = doc(db, "workspaces", workspaceId.value);
   await updateDoc(docRef, {
