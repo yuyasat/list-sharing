@@ -1,17 +1,24 @@
+import User from "@/types/User";
+import Workspace from "@/types/Workspace";
 import { createStore } from "vuex";
 import createPersistedState from 'vuex-persistedstate'
 
-export default createStore({
+type State = {
+  firebaseUser: User | null;
+  workspace: Workspace | null;
+}
+
+export default createStore<State>({
   state: {
     firebaseUser: null,
     workspace: null,
   },
   getters: {},
   mutations: {
-    setFirebaseUser(state, user) {
+    setFirebaseUser(state, user: User) {
       state.firebaseUser = user;
     },
-    setWorkspace(state, workspace) {
+    setWorkspace(state, workspace: Workspace) {
       state.workspace = workspace;
     },
   },

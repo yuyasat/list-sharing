@@ -4,9 +4,23 @@
 
 <script lang="ts" setup>
 import { useStore } from "vuex";
-import useOnAuthStateChanged from "./composables/useOnAuthStateChanged";
+import { auth } from "./firebase";
+import router from "./router";
 
 const store = useStore();
 
-useOnAuthStateChanged(store, () => {});
+auth.onAuthStateChanged(async (user) => {
+  if (user) {
+    const _user = {
+      displayName: user.displayName,
+      uid: user.uid,
+      email: user.email,
+    };
+    store.commit("setFirebaseUser", _user);
+
+    return user;
+  } else {
+    router.push("/");
+  }
+});
 </script>
