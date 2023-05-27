@@ -141,4 +141,12 @@ const threeDotsMenuList = [
 .done {
   text-decoration: line-through;
 }
+.list:last-child::after {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 50px;
+  top: 0;
+  left: 0;
+}
 </style>

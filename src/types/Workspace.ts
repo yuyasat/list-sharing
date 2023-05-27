@@ -1,7 +1,8 @@
 type Workspace = {
-  id?: string
-  title: string
-  visible: boolean
-}
+  id?: string;
+  title: string;
+  visible: boolean;
+  order: number;
+};
 
-export default Workspace
+export default Workspace;
