@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "list-sharing-2e970"
-  }
+    "default": "list-sharing-2e970",
+    "dev": "list-sharing-dev"
+  },
+  "targets": {},
+  "etags": {}
 }
